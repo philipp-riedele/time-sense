@@ -19,10 +19,9 @@ Large language models have zero sense of time. They don't know if seconds or hou
 Teaches Claude to:
 - **Always verify** before making time statements (run `date`, don't guess)
 - **Calculate durations** explicitly (subtraction, not "a while ago")
-- **Know realistic process times** (npm install = 30s-3min, Docker build = 1-10min)
-- **Compute transfer times** using actual math (file size / bandwidth)
-- **Check status** instead of suggesting "let's wait" when a process should be done
-- **Never assume** what time of day it is or how long the user has been working
+- **Check process status directly** instead of predicting whether something "should be done by now"
+- **Compute transfer times** using actual math (file size / bandwidth) — only when bandwidth is known
+- **Use time context naturally** (greetings, day of week) without assuming the user's state or schedule
 
 ## Install
 
@@ -37,13 +36,13 @@ Without this plugin, Claude will:
 - Reuse a timestamp from 40 minutes ago and present it as current
 - Tell you to "wait a bit" for a build that finished an hour ago
 - Say a log entry is "recent" when it's 3 days old
-- Wish you "good morning" at midnight
+- Say "it should be done by now" instead of checking the actual status
 
 With this plugin, Claude will:
 - Run `date` before any time-related statement
 - Calculate exact durations: "This file was modified 2 hours 15 minutes ago"
-- Recognize that a 3-minute build started 45 minutes ago is done or failed
-- Never make assumptions about your schedule or time of day
+- Check process status directly instead of guessing based on elapsed time
+- Use time-of-day context naturally while respecting your schedule
 
 ## Plugin structure
 
@@ -52,12 +51,14 @@ time-sense/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── hooks/
-│   ├── session_start_time.md
-│   ├── fresh_timestamp.md
-│   └── pre_compact_time.md
+│   ├── hooks.json
+│   ├── session-start.sh
+│   ├── fresh-timestamp.sh
+│   └── pre-compact.sh
 ├── skills/
 │   └── time-sense/
 │       └── SKILL.md
+├── LICENSE
 └── README.md
 ```
 

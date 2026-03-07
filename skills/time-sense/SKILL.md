@@ -134,6 +134,25 @@ When multiple background processes are running:
 - Each process has its own realistic duration baseline
 - Check each one individually when asked for status
 
+### Rule 11: Normalize timezones before comparing.
+
+When comparing timestamps from different sources (local machine, remote servers, logs, APIs, git commits), they may be in different timezones. A direct subtraction without timezone awareness produces wrong results.
+
+**Before calculating a time difference across sources:**
+1. Check what timezone each timestamp is in
+2. Convert both to the same timezone (UTC is the safest common ground)
+3. Then subtract
+
+**Example:**
+- Server log shows `2026-03-07 06:18:51 PST` (UTC-8)
+- Local time is `2026-03-07 15:18:51 CET` (UTC+1)
+- Naive subtraction: 15:18 - 06:18 = 9 hours → **wrong**, they're the same moment
+- Correct: Convert both to UTC → 14:18 UTC and 14:18 UTC → 0 seconds apart
+
+**When in doubt:** Use `date -u` for UTC output, or `date -d "TIMESTAMP" +%s` to convert any timestamp to epoch seconds (timezone-agnostic).
+
+**When it doesn't matter:** If all timestamps come from the same machine (file ages, process uptimes, local logs), timezone conversion is unnecessary — they're already in the same zone.
+
 ## Decision Tree
 
 Before any response that touches time:
@@ -151,6 +170,12 @@ Am I about to say "recently/earlier/a while ago/soon"?
 
 Am I about to suggest "waiting" or "checking back later"?
 ├─ YES → STOP. Check the status NOW instead.
+└─ NO  → Proceed.
+
+Am I comparing timestamps from different sources? (server logs, APIs, remote machines)
+├─ YES → Are they in the same timezone?
+│        ├─ YES → Subtract directly.
+│        └─ NO  → Convert both to UTC or epoch seconds first, then subtract.
 └─ NO  → Proceed.
 
 Am I about to assume the user's state based on time? (tired, should stop, long day)
@@ -171,7 +196,7 @@ date +%s
 stat -c %y filename
 
 # File age in human-readable form
-echo "Modified $(( ($(date +%s) - $(stat -c %s filename)) / 3600 )) hours ago"
+echo "Modified $(( ($(date +%s) - $(stat -c %Y filename)) / 3600 )) hours ago"
 
 # Process uptime by PID
 ps -p <PID> -o etime=
@@ -184,6 +209,12 @@ echo $(( $(date +%s) - $(date -d "2025-01-15 14:30:00" +%s) ))
 
 # Docker container uptime
 docker inspect --format='{{.State.StartedAt}}' container_name
+
+# Current time in UTC (for cross-timezone comparisons)
+date -u +"%Y-%m-%d %H:%M:%S UTC"
+
+# Convert any timestamp to epoch seconds (timezone-safe comparison)
+date -d "2026-03-07 06:18:51 PST" +%s
 ```
 
 ## Anti-Patterns — Banned Phrases
