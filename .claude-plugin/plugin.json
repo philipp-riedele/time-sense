@@ -1,0 +1,10 @@
+{
+  "name": "time-sense",
+  "version": "1.0.0",
+  "description": "Gives Claude a sense of time. Injects current timestamps, prevents stale time references, and teaches Claude to calculate durations, estimate process times, and never guess when it comes to time.",
+  "author": {
+    "name": "Philipp Riedele",
+    "email": "info@prmeta.de"
+  },
+  "homepage": "https://github.com/philipp-riedele/time-sense"
+}
