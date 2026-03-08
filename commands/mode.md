@@ -22,7 +22,8 @@ If "$ARGUMENTS" is empty, ".mode", or anything other than "full" or "summary", t
 
 Run this bash command:
 ```bash
-echo "inject_timeline=$ARGUMENTS" > ~/.claude/time-sense.conf
+EXISTING=$(grep -v "^inject_timeline=" ~/.claude/time-sense.conf 2>/dev/null || true)
+echo -e "${EXISTING}\ninject_timeline=$ARGUMENTS" | grep -v "^$" > ~/.claude/time-sense.conf
 ```
 
 Then confirm:

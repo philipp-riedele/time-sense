@@ -2,6 +2,11 @@
 INPUT=$(cat)
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S %Z")
 
+# Initialize settings with defaults on first run
+if [ ! -f "$HOME/.claude/time-sense.conf" ]; then
+  echo "inject_timeline=full" > "$HOME/.claude/time-sense.conf"
+fi
+
 # Extract conversation ID (requires jq, degrades gracefully without it)
 CONV_ID=""
 if command -v jq >/dev/null 2>&1; then

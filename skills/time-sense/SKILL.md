@@ -94,7 +94,7 @@ When examining logs, git history, file metadata, or any timestamped data:
 - Always compare to current time and state the exact difference
 - "This error occurred at 08:14:22. Current time is 14:45:10. That's 6 hours 30 minutes ago."
 - "Last commit was on the 1st at 19:40. Today is the 7th. That's 6 days ago."
-- Use `stat -c %y filename` to get file modification time
+- Use `stat -c %y filename` (Linux) or `stat -f "%Sm" filename` (macOS) to get file modification time
 - Use `git log --format="%ai" -1` for last commit time
 - Do the subtraction. Always.
 
@@ -149,7 +149,7 @@ When comparing timestamps from different sources (local machine, remote servers,
 - Naive subtraction: 15:18 - 06:18 = 9 hours → **wrong**, they're the same moment
 - Correct: Convert both to UTC → 14:18 UTC and 14:18 UTC → 0 seconds apart
 
-**When in doubt:** Use `date -u` for UTC output, or `date -d "TIMESTAMP" +%s` to convert any timestamp to epoch seconds (timezone-agnostic).
+**When in doubt:** Use `date -u` for UTC output. To convert a timestamp to epoch seconds (timezone-agnostic): `date -d "TIMESTAMP" +%s` on Linux, or `date -j -f "%Y-%m-%d %H:%M:%S %Z" "TIMESTAMP" +%s` on macOS.
 
 **When it doesn't matter:** If all timestamps come from the same machine (file ages, process uptimes, local logs), timezone conversion is unnecessary — they're already in the same zone.
 
@@ -185,6 +185,10 @@ Am I about to assume the user's state based on time? (tired, should stop, long d
 
 ## Quick Reference: Commands
 
+> Commands use GNU/Linux syntax by default. macOS equivalents are shown where
+> they differ. Claude should detect the platform (`uname`) and use the correct
+> variant automatically. On Windows (WSL/Git Bash), the Linux variants apply.
+
 ```bash
 # Current date and time
 date +"%Y-%m-%d %H:%M:%S %Z"
@@ -193,10 +197,14 @@ date +"%Y-%m-%d %H:%M:%S %Z"
 date +%s
 
 # File modification time
-stat -c %y filename
+stat -c %y filename              # Linux
+stat -f "%Sm" filename            # macOS
 
 # File age in human-readable form
+# Linux:
 echo "Modified $(( ($(date +%s) - $(stat -c %Y filename)) / 3600 )) hours ago"
+# macOS:
+echo "Modified $(( ($(date +%s) - $(stat -f %m filename)) / 3600 )) hours ago"
 
 # Process uptime by PID
 ps -p <PID> -o etime=
@@ -205,7 +213,10 @@ ps -p <PID> -o etime=
 git log --format="%ai" -1
 
 # Time difference between two timestamps (seconds)
+# Linux:
 echo $(( $(date +%s) - $(date -d "2025-01-15 14:30:00" +%s) ))
+# macOS:
+echo $(( $(date +%s) - $(date -j -f "%Y-%m-%d %H:%M:%S" "2025-01-15 14:30:00" +%s) ))
 
 # Docker container uptime
 docker inspect --format='{{.State.StartedAt}}' container_name
@@ -214,7 +225,10 @@ docker inspect --format='{{.State.StartedAt}}' container_name
 date -u +"%Y-%m-%d %H:%M:%S UTC"
 
 # Convert any timestamp to epoch seconds (timezone-safe comparison)
+# Linux:
 date -d "2026-03-07 06:18:51 PST" +%s
+# macOS:
+date -j -f "%Y-%m-%d %H:%M:%S %Z" "2026-03-07 06:18:51 PST" +%s
 ```
 
 ## Anti-Patterns — Banned Phrases
