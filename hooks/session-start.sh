@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 INPUT=$(cat)
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S %Z")
-CONV_ID=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null | xargs basename 2>/dev/null | sed 's/\.jsonl$//')
+
+# Extract conversation ID (requires jq, degrades gracefully without it)
+CONV_ID=""
+if command -v jq >/dev/null 2>&1; then
+  CONV_ID=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null | xargs basename 2>/dev/null | sed 's/\.jsonl$//')
+fi
 
 if [ -n "$CONV_ID" ]; then
   mkdir -p "$HOME/.claude/time-sense-logs"

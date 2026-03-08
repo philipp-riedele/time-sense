@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 INPUT=$(cat)
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S %Z")
-CONV_ID=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null | xargs basename 2>/dev/null | sed 's/\.jsonl$//')
+
+# Extract conversation ID (requires jq, degrades gracefully without it)
+CONV_ID=""
+if command -v jq >/dev/null 2>&1; then
+  CONV_ID=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null | xargs basename 2>/dev/null | sed 's/\.jsonl$//')
+fi
 
 MSG="Current time at compaction: ${TIMESTAMP}."
 
@@ -17,8 +22,12 @@ if [ -n "$CONV_ID" ]; then
     FIRST_EVENT=$(head -1 "$LOG_FILE" | cut -d'|' -f3)
     [ -z "$FIRST_EVENT" ] && FIRST_EVENT=$(head -1 "$LOG_FILE" | cut -d'|' -f2)
 
+    # Read mode from config (portable, no grep -P)
     MODE="full"
-    [ -f "$HOME/.claude/time-sense.conf" ] && MODE=$(grep -oP 'inject_timeline=\K\S+' "$HOME/.claude/time-sense.conf" 2>/dev/null || echo "full")
+    if [ -f "$HOME/.claude/time-sense.conf" ]; then
+      MODE=$(sed -n 's/^inject_timeline=//p' "$HOME/.claude/time-sense.conf" 2>/dev/null)
+      [ -z "$MODE" ] && MODE="full"
+    fi
 
     if [ "$MODE" = "summary" ]; then
       USER_PROMPTS=$(grep -c "UserPrompt" "$LOG_FILE" || echo "0")
@@ -33,5 +42,17 @@ ${TIMELINE}"
   fi
 fi
 
-printf '%s' "$MSG" | jq -Rs '{systemMessage: .}'
+# Output JSON (jq preferred, python3 fallback for multiline escaping)
+if command -v jq >/dev/null 2>&1; then
+  printf '%s' "$MSG" | jq -Rs '{systemMessage: .}'
+elif command -v python3 >/dev/null 2>&1; then
+  printf '%s' "$MSG" | python3 -c "import json,sys; print(json.dumps({'systemMessage': sys.stdin.read()}))"
+else
+  # Last resort: simple output without multiline escaping
+  cat << EOF
+{
+  "systemMessage": "Current time at compaction: ${TIMESTAMP}."
+}
+EOF
+fi
 exit 0
