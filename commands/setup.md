@@ -23,18 +23,13 @@ Copy the matching pre-built hooks.json over the active one. Do NOT write or modi
 cp "${CLAUDE_PLUGIN_ROOT}/hooks/hooks.${RUNTIME}.json" "${CLAUDE_PLUGIN_ROOT}/hooks/hooks.json"
 ```
 
-Update time-sense.conf:
-```bash
-EXISTING=$(grep -v "^runtime=" ~/.claude/time-sense.conf 2>/dev/null || true)
-echo -e "${EXISTING}\nruntime=${RUNTIME}" | grep -v "^$" > ~/.claude/time-sense.conf
-```
-
 Then confirm: "Hook runtime set to **$RUNTIME**. Changes take effect on next session start."
 
 **Step 1b — SHOW current setup:**
 
+Detect current runtime by reading hooks.json:
 ```bash
-grep "^runtime=" ~/.claude/time-sense.conf 2>/dev/null || echo "runtime=node (default)"
+grep -q "\.mjs" "${CLAUDE_PLUGIN_ROOT}/hooks/hooks.json" && echo "runtime=node" || echo "runtime=bash"
 grep "^inject_timeline=" ~/.claude/time-sense.conf 2>/dev/null || echo "inject_timeline=full (default)"
 ```
 
