@@ -27,6 +27,7 @@ process.stdin.on('end', () => {
   // Initialize settings with defaults on first run
   const confPath = join(homedir(), '.claude', 'time-sense.conf');
   if (!existsSync(confPath)) {
+    mkdirSync(join(homedir(), '.claude'), { recursive: true });
     writeFileSync(confPath, 'inject_timeline=full\n');
   }
 
