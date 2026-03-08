@@ -1,6 +1,6 @@
 ---
 name: mode
-description: "Timeline injection: /mode full | /mode summary | /mode (show current)"
+description: "full | summary — Timeline injection mode"
 arguments:
   - name: mode
     description: "Injection mode: 'full' (all events) or 'summary' (metadata only). Omit to show current mode."
