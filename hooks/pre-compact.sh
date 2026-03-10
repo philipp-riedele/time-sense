@@ -22,8 +22,8 @@ if [ -n "$CONV_ID" ]; then
     # Strip \r (Windows carriage returns) once, work from clean data
     LOG_CLEAN=$(tr -d '\r' < "$LOG_FILE")
     TOTAL=$(echo "$LOG_CLEAN" | wc -l | tr -d ' ')
-    COMPACTIONS=$(echo "$LOG_CLEAN" | grep -c "PreCompact" || echo "0")
-    SESSIONS=$(echo "$LOG_CLEAN" | grep -c "SessionStart" || echo "0")
+    COMPACTIONS=$(echo "$LOG_CLEAN" | grep -c "PreCompact")
+    SESSIONS=$(echo "$LOG_CLEAN" | grep -c "SessionStart")
     FIRST_EVENT=$(echo "$LOG_CLEAN" | head -1 | cut -d'|' -f3)
     [ -z "$FIRST_EVENT" ] && FIRST_EVENT=$(echo "$LOG_CLEAN" | head -1 | cut -d'|' -f2)
 
@@ -35,7 +35,7 @@ if [ -n "$CONV_ID" ]; then
     fi
 
     if [ "$MODE" = "summary" ]; then
-      USER_PROMPTS=$(echo "$LOG_CLEAN" | grep -c "UserPrompt" || echo "0")
+      USER_PROMPTS=$(echo "$LOG_CLEAN" | grep -c "UserPrompt")
       STRUCTURAL_EVENTS=$(echo "$LOG_CLEAN" | grep -E "^(SessionStart|PreCompact)")
       MSG="Compaction #${COMPACTIONS} at ${TIMESTAMP}. Conversation first started at ${FIRST_EVENT}. Total sessions: ${SESSIONS}. Total compactions: ${COMPACTIONS}. Total user messages: ${USER_PROMPTS}. Total events logged: ${TOTAL}. Session starts and compaction timestamps (structural events):
 ${STRUCTURAL_EVENTS}"

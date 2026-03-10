@@ -1,6 +1,7 @@
 ---
 name: setup
 description: "node | bash — Runtime"
+argument-hint: "[node | bash]"
 arguments:
   - name: runtime
     description: "Runtime to use: 'node' or 'bash'. Omit to show current setup."
