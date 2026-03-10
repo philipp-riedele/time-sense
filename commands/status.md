@@ -76,9 +76,11 @@ if [ -d "$LOG_DIR" ]; then
   if [ "$LOG_COUNT" -gt 0 ]; then
     TOTAL_SIZE=$(du -sh "$LOG_DIR" 2>/dev/null | cut -f1)
     OLDEST=$(ls -tr "$LOG_DIR"/*.log 2>/dev/null | head -1)
-    OLDEST_DATE=$(stat -c %y "$OLDEST" 2>/dev/null | cut -d. -f1)
+    OLDEST_DATE=$(stat -c %y "$OLDEST" 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$OLDEST" 2>/dev/null)
+    OLDEST_DATE=$(echo "$OLDEST_DATE" | cut -d. -f1)
     NEWEST=$(ls -t "$LOG_DIR"/*.log 2>/dev/null | head -1)
-    NEWEST_DATE=$(stat -c %y "$NEWEST" 2>/dev/null | cut -d. -f1)
+    NEWEST_DATE=$(stat -c %y "$NEWEST" 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$NEWEST" 2>/dev/null)
+    NEWEST_DATE=$(echo "$NEWEST_DATE" | cut -d. -f1)
 
     echo "Total logs: $LOG_COUNT"
     echo "Total size: $TOTAL_SIZE"
