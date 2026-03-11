@@ -4,7 +4,7 @@ description: "node | bash — Runtime"
 argument-hint: "[node | bash]"
 arguments:
   - name: runtime
-    description: "Runtime to use: 'node' or 'bash'. Omit to show current setup."
+    description: "Choose ONE runtime: 'node' or 'bash'. Only one can be active at a time. Omit to show current setup."
     required: false
     type: string
 ---

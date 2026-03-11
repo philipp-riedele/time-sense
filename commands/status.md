@@ -1,6 +1,7 @@
 ---
 name: status
 description: "Plugin health, session stats, log overview"
+argument-hint: ""
 ---
 
 The user called /time-sense:status. Run this diagnostic script and present the results clearly:
